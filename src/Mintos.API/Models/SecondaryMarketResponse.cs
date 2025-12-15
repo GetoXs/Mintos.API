@@ -19,6 +19,9 @@ public class PaginationResult
 public class SecondaryMarketNote
 {
     public string? Isin { get; set; }
+    /// <summary>
+    /// Secondary market id.
+    /// </summary>
     public string? ShareId { get; set; }
     public string? PledgeTypeGroup { get; set; }
     public int LenderCompanyId { get; set; }
@@ -26,9 +29,21 @@ public class SecondaryMarketNote
     public string? CountryCode { get; set; }
     public DateTime MaturityDate { get; set; }
     public decimal InterestRate { get; set; }
+    /// <summary>
+    /// Initial secondary market amount for investment - should not be used for investment.
+    /// </summary>
     public MoneyAmount? AvailableForInvestmentAmount { get; set; }
+    /// <summary>
+    /// Available amount for investment.
+    /// </summary>
     public MoneyAmount? ShareAmount { get; set; }
+    /// <summary>
+    /// Price for investment.
+    /// </summary>
     public MoneyAmount? SharePrice { get; set; }
+    /// <summary>
+    /// Premium or discount in percent.
+    /// </summary>
     public decimal PremiumOrDiscount { get; set; }
     public string? WeightedAverageYieldToMaturity { get; set; }
     public LendingCompanyRiskScore? LendingCompanyRiskScore { get; set; }
