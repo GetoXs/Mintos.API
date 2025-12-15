@@ -86,6 +86,14 @@ public class MintosClient : IDisposable
             "webapp/api/marketplace-api/v1/cart/note-series-shares",
             referer: referer);
     }
+
+    public async Task ClearSharesCartAsync(string? referer = null)
+    {
+        await _proxyApi.SendRequestAsync<object>(
+            HttpMethod.Delete,
+            "webapp/api/marketplace-api/v1/cart/note-series-shares",
+            referer: referer);
+    }
     
     public async Task<ConfirmSharesPurchaseResponse?> ConfirmSharesPurchaseAsync(string reference, string? referer = null)
     {
@@ -102,6 +110,14 @@ public class MintosClient : IDisposable
     {
         return await _proxyApi.SendRequestAsync<CartNotesResponse>(
             HttpMethod.Get,
+            "webapp/api/marketplace-api/v1/cart/note-series",
+            referer: referer);
+    }
+
+    public async Task ClearNotesCartAsync(string? referer = null)
+    {
+        await _proxyApi.SendRequestAsync<object>(
+            HttpMethod.Delete,
             "webapp/api/marketplace-api/v1/cart/note-series",
             referer: referer);
     }
