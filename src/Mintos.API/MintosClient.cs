@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace Mintos.API;
@@ -41,13 +42,13 @@ public class MintosClient : IDisposable
             referer: GetUserReferer);
     }
 
-    public async Task<decimal> GetAvailableBalanceAsync(int currencyCode = 978) // 978 = EUR
+    public async Task<decimal> GetAvailableBalanceAsync(int currencyCode)
     {
         var user = await GetUserAsync();
         var aggregate = user?.Aggregates?.FirstOrDefault(a => a.Currency == currencyCode);
 
         if (aggregate == null)
-            return 0;
+            throw new Exception($"Aggregate not found for currency code: {currencyCode}");
 
         return decimal.TryParse(aggregate.AccountBalance, System.Globalization.NumberStyles.Any,
             System.Globalization.CultureInfo.InvariantCulture, out var balance) ? balance : 0;
