@@ -10,13 +10,14 @@ public class MintosProxyApi : IDisposable
     private readonly CookieContainer _cookieContainer = new();
     private string? _antiCsrfToken;
     private readonly Dictionary<string, string>? _extraHeaders;
+    private readonly Action<MintosCredentials>? _onCredentialsRefreshed;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public MintosProxyApi(Dictionary<string, string>? extraHeaders = null)
+    public MintosProxyApi(Dictionary<string, string>? extraHeaders = null, Action<MintosCredentials>? onCredentialsRefreshed = null)
     {
         var clientHandler = new HttpClientHandler
         {
@@ -29,6 +30,7 @@ public class MintosProxyApi : IDisposable
             BaseAddress = new Uri("https://www.mintos.com/"),
         };
         _extraHeaders = extraHeaders;
+        _onCredentialsRefreshed = onCredentialsRefreshed;
     }
 
     public void SetCredentials(string mwSessionId, string phpSessionId, string antiCsrfToken)
@@ -37,6 +39,17 @@ public class MintosProxyApi : IDisposable
         _cookieContainer.Add(uri, new Cookie("MW_SESSION_ID", mwSessionId));
         _cookieContainer.Add(uri, new Cookie("PHPSESSID", phpSessionId));
         _antiCsrfToken = antiCsrfToken;
+    }
+
+    public MintosCredentials GetCurrentCredentials()
+    {
+        var cookies = _cookieContainer.GetCookies(new Uri("https://www.mintos.com"));
+        return new MintosCredentials
+        {
+            MwSessionId = cookies.FirstOrDefault(c => c.Name == "MW_SESSION_ID")?.Value,
+            PhpSessionId = cookies.FirstOrDefault(c => c.Name == "PHPSESSID")?.Value,
+            AntiCsrfToken = _antiCsrfToken
+        };
     }
 
     public async Task<T?> SendRequestAsync<T>(
@@ -86,6 +99,9 @@ public class MintosProxyApi : IDisposable
         }
 
         var content = await response.Content.ReadAsStringAsync();
+
+        // Notify about refreshed credentials (cookies updated via Set-Cookie)
+        _onCredentialsRefreshed?.Invoke(GetCurrentCredentials());
 
         if (typeof(T) == typeof(string))
             return (T)(object)content;

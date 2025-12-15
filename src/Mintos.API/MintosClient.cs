@@ -7,9 +7,12 @@ public class MintosClient : IDisposable
     private readonly MintosProxyApi _proxyApi;
     private readonly ILogger<MintosClient>? _logger;
 
-    public MintosClient(ILogger<MintosClient>? logger = null, Dictionary<string, string>? extraHeaders = null)
+    public MintosClient(
+        ILogger<MintosClient>? logger = null, 
+        Dictionary<string, string>? extraHeaders = null,
+        Action<MintosCredentials>? onCredentialsRefreshed = null)
     {
-        _proxyApi = new MintosProxyApi(extraHeaders);
+        _proxyApi = new MintosProxyApi(extraHeaders, onCredentialsRefreshed);
         _logger = logger;
     }
 
@@ -17,6 +20,8 @@ public class MintosClient : IDisposable
     {
         _proxyApi.SetCredentials(mwSessionId, phpSessionId, antiCsrfToken);
     }
+
+    public MintosCredentials GetCurrentCredentials() => _proxyApi.GetCurrentCredentials();
 
     #region Authentication
     public async Task<RefreshResponse?> RefreshSessionAsync(string? referer = null)
