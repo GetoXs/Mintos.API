@@ -7,7 +7,6 @@ public class MintosClient : IDisposable
     private readonly MintosProxyApi _proxyApi;
     private readonly ILogger<MintosClient>? _logger;
 
-
     public MintosClient(ILogger<MintosClient>? logger = null, Dictionary<string, string>? extraHeaders = null)
     {
         _proxyApi = new MintosProxyApi(extraHeaders);
@@ -19,6 +18,15 @@ public class MintosClient : IDisposable
         _proxyApi.SetCredentials(mwSessionId, phpSessionId, antiCsrfToken);
     }
 
+    public async Task<RefreshResponse?> RefreshSessionAsync()
+    {
+        var response = await _proxyApi.SendRequestAsync<RefreshResponse>(
+            HttpMethod.Get,
+            "webapp/api/auth/refresh?webappApi=true&marketplaceApi=false");
+
+        return response;
+    }
+
     public string? GetUserReferer { get; set; }
     public async Task<UserResponse?> GetUserAsync()
     {
@@ -27,6 +35,7 @@ public class MintosClient : IDisposable
             "webapp/api/en/webapp-api/user",
             referer: GetUserReferer);
     }
+
     public async Task<decimal> GetAvailableBalanceAsync(int currencyCode = 978) // 978 = EUR
     {
         var user = await GetUserAsync();
