@@ -39,7 +39,12 @@ public class MintosProxyApi : IDisposable
         _antiCsrfToken = antiCsrfToken;
     }
 
-    public async Task<T?> SendRequestAsync<T>(HttpMethod method, string url, object? body = null, string? referer = null)
+    public async Task<T?> SendRequestAsync<T>(
+        HttpMethod method, 
+        string url, 
+        object? body = null, 
+        string? referer = null,
+        string? xRequestedWith = null)
     {
         using var request = new HttpRequestMessage(method, url)
         {
@@ -47,7 +52,12 @@ public class MintosProxyApi : IDisposable
         };
 
         request.Headers.Add("Referer", referer ?? "https://www.mintos.com/en/");
-        
+
+        if (!string.IsNullOrEmpty(xRequestedWith))
+        {
+            request.Headers.Add("X-Requested-With", xRequestedWith);
+        }
+
         if (_extraHeaders != null)
         {
             foreach (var header in _extraHeaders)
@@ -76,7 +86,7 @@ public class MintosProxyApi : IDisposable
         }
 
         var content = await response.Content.ReadAsStringAsync();
-        
+
         if (typeof(T) == typeof(string))
             return (T)(object)content;
 

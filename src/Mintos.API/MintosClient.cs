@@ -18,16 +18,21 @@ public class MintosClient : IDisposable
         _proxyApi.SetCredentials(mwSessionId, phpSessionId, antiCsrfToken);
     }
 
+    public string? RefreshReferer { get; set; }
+
     public async Task<RefreshResponse?> RefreshSessionAsync()
     {
         var response = await _proxyApi.SendRequestAsync<RefreshResponse>(
             HttpMethod.Get,
-            "webapp/api/auth/refresh?webappApi=true&marketplaceApi=false");
+            "webapp/api/auth/refresh?webappApi=true&marketplaceApi=false",
+            referer: RefreshReferer,
+            xRequestedWith: "XMLHttpRequest");
 
         return response;
     }
 
     public string? GetUserReferer { get; set; }
+
     public async Task<UserResponse?> GetUserAsync()
     {
         return await _proxyApi.SendRequestAsync<UserResponse>(
@@ -49,6 +54,7 @@ public class MintosClient : IDisposable
     }
 
     public string? SecondaryMarketReferer { get; set; }
+
     public async Task<SecondaryMarketResponse?> GetSecondaryMarketNotesAsync(SecondaryMarketRequest request)
     {
         return await _proxyApi.SendRequestAsync<SecondaryMarketResponse>(
