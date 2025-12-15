@@ -19,6 +19,7 @@ public class PaginationResult
 public class SecondaryMarketNote
 {
     public string? Isin { get; set; }
+    public string? Url { get => Isin != null ? $"https://www.mintos.com/en/set-of-notes/{Isin}" : null; }
     /// <summary>
     /// Secondary market id.
     /// </summary>
