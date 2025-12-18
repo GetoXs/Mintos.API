@@ -2,8 +2,8 @@ namespace Mintos.API;
 
 public class MintosCredentials
 {
-    public string? MwSessionId { get; set; }
-    public string? PhpSessionId { get; set; }
-    public string? AntiCsrfToken { get; set; }
+    public string? MintosMwSessionId { get; set; }
+    public string? MintosPhpSessionId { get; set; }
+    public string? MintosAntiCsrfToken { get; set; }
 }
 

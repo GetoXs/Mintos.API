@@ -46,9 +46,9 @@ public class MintosProxyApi : IDisposable
         var cookies = _cookieContainer.GetCookies(new Uri("https://www.mintos.com"));
         return new MintosCredentials
         {
-            MwSessionId = cookies.FirstOrDefault(c => c.Name == "MW_SESSION_ID")?.Value,
-            PhpSessionId = cookies.FirstOrDefault(c => c.Name == "PHPSESSID")?.Value,
-            AntiCsrfToken = _antiCsrfToken
+            MintosMwSessionId = cookies.FirstOrDefault(c => c.Name == "MW_SESSION_ID")?.Value,
+            MintosPhpSessionId = cookies.FirstOrDefault(c => c.Name == "PHPSESSID")?.Value,
+            MintosAntiCsrfToken = _antiCsrfToken
         };
     }
 
