@@ -4,7 +4,7 @@ public class SecondaryMarketRequest
 {
     public string[]? PledgeTypeGroups { get; set; }
     public int[]? Countries { get; set; }
-    public int?[]? LenderCompanies { get; set; }
+    public int[]? LenderCompanies { get; set; }
     public int[]? LenderGroups { get; set; }
     public string? MinLendingCompanyRiskScore { get; set; }
     public string? MaxLendingCompanyRiskScore { get; set; }
