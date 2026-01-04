@@ -20,6 +20,12 @@ public class MintosClient : IDisposable
 		_proxyApi.SetCredentials(mwSessionId, phpSessionId, antiCsrfToken);
 	}
 
+	public Func<Task>? OnUnauthorizedAsync
+	{
+		get => _proxyApi.OnUnauthorizedAsync;
+		set => _proxyApi.OnUnauthorizedAsync = value;
+	}
+
 	public MintosCredentials GetCurrentCredentials() => _proxyApi.GetCurrentCredentials();
 
 	#region Authentication

@@ -11,6 +11,8 @@ public class MintosProxyApi : IDisposable
 	private string? _antiCsrfToken;
 	private readonly Dictionary<string, string>? _extraHeaders;
 
+	public Func<Task>? OnUnauthorizedAsync { get; set; }
+
 	private static readonly JsonSerializerOptions JsonOptions = new()
 	{
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -57,11 +59,10 @@ public class MintosProxyApi : IDisposable
 		string? referer = null,
 		string? xRequestedWith = null)
 	{
-		using var request = new HttpRequestMessage(method, url)
-		{
-			Content = body != null ? JsonContent.Create(body, options: JsonOptions) : null,
-		};
-
+		bool wasRetried = false;
+		using var request = new HttpRequestMessage(method, url);
+start:
+		request.Content = body != null ? JsonContent.Create(body, options: JsonOptions) : null;
 		request.Headers.Add("Referer", referer ?? "https://www.mintos.com/en/");
 
 		if (!string.IsNullOrEmpty(xRequestedWith))
@@ -92,7 +93,19 @@ public class MintosProxyApi : IDisposable
 			if (response.StatusCode == HttpStatusCode.Unauthorized ||
 				(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
 			{
-				throw new UnauthorizedAccessException(errorContent);
+				if (OnUnauthorizedAsync != null)
+				{
+					await OnUnauthorizedAsync();
+					if (!wasRetried)
+					{
+						wasRetried = true;
+						goto start;
+					}
+				}
+				else
+				{
+					throw new UnauthorizedAccessException(errorContent);
+				}
 			}
 
 			throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {errorContent}");
