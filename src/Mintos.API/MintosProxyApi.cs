@@ -87,14 +87,16 @@ public class MintosProxyApi : IDisposable
 
         var response = await _httpClient.SendAsync(request);
 
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            throw new UnauthorizedAccessException(await response.Content.ReadAsStringAsync());
-        }
-
         if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
+
+			if (response.StatusCode == HttpStatusCode.Unauthorized ||
+				(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
+			{
+				throw new UnauthorizedAccessException(errorContent);
+			}
+
             throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {errorContent}");
         }
 
