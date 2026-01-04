@@ -6,90 +6,88 @@ namespace Mintos.API;
 
 public class MintosProxyApi : IDisposable
 {
-    private readonly HttpClient _httpClient;
-    private readonly CookieContainer _cookieContainer = new();
-    private string? _antiCsrfToken;
-    private readonly Dictionary<string, string>? _extraHeaders;
-    private readonly Action<MintosCredentials>? _onCredentialsRefreshed;
+	private readonly HttpClient _httpClient;
+	private readonly CookieContainer _cookieContainer = new();
+	private string? _antiCsrfToken;
+	private readonly Dictionary<string, string>? _extraHeaders;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+	private static readonly JsonSerializerOptions JsonOptions = new()
+	{
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+	};
 
-    public MintosProxyApi(Dictionary<string, string>? extraHeaders = null, Action<MintosCredentials>? onCredentialsRefreshed = null)
-    {
-        var clientHandler = new HttpClientHandler
-        {
-            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli,
-            UseCookies = true,
-            CookieContainer = _cookieContainer,
-        };
-        _httpClient = new HttpClient(clientHandler)
-        {
-            BaseAddress = new Uri("https://www.mintos.com/"),
-        };
-        _extraHeaders = extraHeaders;
-        _onCredentialsRefreshed = onCredentialsRefreshed;
-    }
+	public MintosProxyApi(Dictionary<string, string>? extraHeaders = null)
+	{
+		var clientHandler = new HttpClientHandler
+		{
+			AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli,
+			UseCookies = true,
+			CookieContainer = _cookieContainer,
+		};
+		_httpClient = new HttpClient(clientHandler)
+		{
+			BaseAddress = new Uri("https://www.mintos.com/"),
+		};
+		_extraHeaders = extraHeaders;
+	}
 
-    public void SetCredentials(string mwSessionId, string phpSessionId, string antiCsrfToken)
-    {
-        var uri = new Uri("https://www.mintos.com");
-        _cookieContainer.Add(uri, new Cookie("MW_SESSION_ID", mwSessionId));
-        _cookieContainer.Add(uri, new Cookie("PHPSESSID", phpSessionId));
-        _antiCsrfToken = antiCsrfToken;
-    }
+	public void SetCredentials(string mwSessionId, string phpSessionId, string antiCsrfToken)
+	{
+		var uri = new Uri("https://www.mintos.com");
+		_cookieContainer.Add(uri, new Cookie("MW_SESSION_ID", mwSessionId));
+		_cookieContainer.Add(uri, new Cookie("PHPSESSID", phpSessionId));
+		_antiCsrfToken = antiCsrfToken;
+	}
 
-    public MintosCredentials GetCurrentCredentials()
-    {
-        var cookies = _cookieContainer.GetCookies(new Uri("https://www.mintos.com"));
-        return new MintosCredentials
-        {
-            MintosMwSessionId = cookies.FirstOrDefault(c => c.Name == "MW_SESSION_ID")?.Value,
-            MintosPhpSessionId = cookies.FirstOrDefault(c => c.Name == "PHPSESSID")?.Value,
-            MintosAntiCsrfToken = _antiCsrfToken
-        };
-    }
+	public MintosCredentials GetCurrentCredentials()
+	{
+		var cookies = _cookieContainer.GetCookies(new Uri("https://www.mintos.com"));
+		return new MintosCredentials
+		{
+			MintosMwSessionId = cookies.FirstOrDefault(c => c.Name == "MW_SESSION_ID")?.Value,
+			MintosPhpSessionId = cookies.FirstOrDefault(c => c.Name == "PHPSESSID")?.Value,
+			MintosAntiCsrfToken = _antiCsrfToken
+		};
+	}
 
-    public async Task<T?> SendRequestAsync<T>(
-        HttpMethod method, 
-        string url, 
-        object? body = null, 
-        string? referer = null,
-        string? xRequestedWith = null)
-    {
-        using var request = new HttpRequestMessage(method, url)
-        {
-            Content = body != null ? JsonContent.Create(body, options: JsonOptions) : null,
-        };
+	public async Task<T?> SendRequestAsync<T>(
+		HttpMethod method, 
+		string url, 
+		object? body = null, 
+		string? referer = null,
+		string? xRequestedWith = null)
+	{
+		using var request = new HttpRequestMessage(method, url)
+		{
+			Content = body != null ? JsonContent.Create(body, options: JsonOptions) : null,
+		};
 
-        request.Headers.Add("Referer", referer ?? "https://www.mintos.com/en/");
+		request.Headers.Add("Referer", referer ?? "https://www.mintos.com/en/");
 
-        if (!string.IsNullOrEmpty(xRequestedWith))
-        {
-            request.Headers.Add("X-Requested-With", xRequestedWith);
-        }
+		if (!string.IsNullOrEmpty(xRequestedWith))
+		{
+			request.Headers.Add("X-Requested-With", xRequestedWith);
+		}
 
-        if (_extraHeaders != null)
-        {
-            foreach (var header in _extraHeaders)
-            {
-                request.Headers.Add(header.Key, header.Value);
-            }
-        }
+		if (_extraHeaders != null)
+		{
+			foreach (var header in _extraHeaders)
+			{
+				request.Headers.Add(header.Key, header.Value);
+			}
+		}
 
-        // CSRF token
-        if (!string.IsNullOrEmpty(_antiCsrfToken))
-        {
-            request.Headers.Add("anti-csrf-token", _antiCsrfToken);
-        }
+		// CSRF token
+		if (!string.IsNullOrEmpty(_antiCsrfToken))
+		{
+			request.Headers.Add("anti-csrf-token", _antiCsrfToken);
+		}
 
-        var response = await _httpClient.SendAsync(request);
+		var response = await _httpClient.SendAsync(request);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
+		if (!response.IsSuccessStatusCode)
+		{
+			var errorContent = await response.Content.ReadAsStringAsync();
 
 			if (response.StatusCode == HttpStatusCode.Unauthorized ||
 				(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
@@ -97,31 +95,28 @@ public class MintosProxyApi : IDisposable
 				throw new UnauthorizedAccessException(errorContent);
 			}
 
-            throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {errorContent}");
-        }
+			throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {errorContent}");
+		}
 
-        var content = await response.Content.ReadAsStringAsync();
+		var content = await response.Content.ReadAsStringAsync();
 
-        // Notify about refreshed credentials (cookies updated via Set-Cookie)
-        _onCredentialsRefreshed?.Invoke(GetCurrentCredentials());
+		if (typeof(T) == typeof(string))
+			return (T)(object)content;
 
-        if (typeof(T) == typeof(string))
-            return (T)(object)content;
+		if (string.IsNullOrWhiteSpace(content))
+			return default;
 
-        if (string.IsNullOrWhiteSpace(content))
-            return default;
+		return JsonSerializer.Deserialize<T>(content, JsonOptions);
+	}
 
-        return JsonSerializer.Deserialize<T>(content, JsonOptions);
-    }
+	public bool IsAuthenticated =>
+		_cookieContainer.GetCookies(new Uri("https://www.mintos.com"))
+			.Cast<Cookie>()
+			.Any(c => c.Name == "MW_SESSION_ID");
 
-    public bool IsAuthenticated =>
-        _cookieContainer.GetCookies(new Uri("https://www.mintos.com"))
-            .Cast<Cookie>()
-            .Any(c => c.Name == "MW_SESSION_ID");
-
-    public void Dispose()
-    {
-        _httpClient.Dispose();
-        GC.SuppressFinalize(this);
-    }
+	public void Dispose()
+	{
+		_httpClient.Dispose();
+		GC.SuppressFinalize(this);
+	}
 }

@@ -9,10 +9,9 @@ public class MintosClient : IDisposable
 
 	public MintosClient(
 		ILogger<MintosClient>? logger = null, 
-		Dictionary<string, string>? extraHeaders = null,
-		Action<MintosCredentials>? onCredentialsRefreshed = null)
+		Dictionary<string, string>? extraHeaders = null)
 	{
-		_proxyApi = new MintosProxyApi(extraHeaders, onCredentialsRefreshed);
+		_proxyApi = new MintosProxyApi(extraHeaders);
 		_logger = logger;
 	}
 
