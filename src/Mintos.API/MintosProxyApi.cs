@@ -53,73 +53,75 @@ public class MintosProxyApi : IDisposable
 	}
 
 	public async Task<T?> SendRequestAsync<T>(
-		HttpMethod method, 
-		string url, 
-		object? body = null, 
+		HttpMethod method,
+		string url,
+		object? body = null,
 		string? referer = null,
 		string? xRequestedWith = null)
 	{
 		bool wasRetried = false;
-		using var request = new HttpRequestMessage(method, url);
-start:
-		request.Content = body != null ? JsonContent.Create(body, options: JsonOptions) : null;
-		request.Headers.Add("Referer", referer ?? "https://www.mintos.com/en/");
-
-		if (!string.IsNullOrEmpty(xRequestedWith))
+	start:
+		using (var request = new HttpRequestMessage(method, url))
 		{
-			request.Headers.Add("X-Requested-With", xRequestedWith);
-		}
+			request.Content = body != null ? JsonContent.Create(body, options: JsonOptions) : null;
+			request.Headers.Add("Referer", referer ?? "https://www.mintos.com/en/");
 
-		if (_extraHeaders != null)
-		{
-			foreach (var header in _extraHeaders)
+			if (!string.IsNullOrEmpty(xRequestedWith))
 			{
-				request.Headers.Add(header.Key, header.Value);
+				request.Headers.Add("X-Requested-With", xRequestedWith);
 			}
-		}
 
-		// CSRF token
-		if (!string.IsNullOrEmpty(_antiCsrfToken))
-		{
-			request.Headers.Add("anti-csrf-token", _antiCsrfToken);
-		}
-
-		var response = await _httpClient.SendAsync(request);
-
-		if (!response.IsSuccessStatusCode)
-		{
-			var errorContent = await response.Content.ReadAsStringAsync();
-
-			if (response.StatusCode == HttpStatusCode.Unauthorized ||
-				(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
+			if (_extraHeaders != null)
 			{
-				if (OnUnauthorizedAsync != null)
+				foreach (var header in _extraHeaders)
 				{
-					await OnUnauthorizedAsync();
-					if (!wasRetried)
+					request.Headers.Add(header.Key, header.Value);
+				}
+			}
+
+			// CSRF token
+			if (!string.IsNullOrEmpty(_antiCsrfToken))
+			{
+				request.Headers.Add("anti-csrf-token", _antiCsrfToken);
+			}
+
+			var response = await _httpClient.SendAsync(request);
+
+			if (!response.IsSuccessStatusCode)
+			{
+				var errorContent = await response.Content.ReadAsStringAsync();
+
+				if (response.StatusCode == HttpStatusCode.Unauthorized ||
+					(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
+				{
+					if (OnUnauthorizedAsync != null)
 					{
-						wasRetried = true;
-						goto start;
+						await OnUnauthorizedAsync();
+						if (!wasRetried)
+						{
+							wasRetried = true;
+							goto start;
+						}
+					}
+					else
+					{
+						throw new UnauthorizedAccessException(errorContent);
 					}
 				}
-				else
-				{
-					throw new UnauthorizedAccessException(errorContent);
-				}
+
+				throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {errorContent}");
 			}
 
-			throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {errorContent}");
+			var content = await response.Content.ReadAsStringAsync();
+
+			if (typeof(T) == typeof(string))
+				return (T)(object)content;
+
+			if (string.IsNullOrWhiteSpace(content))
+				return default;
+
+			return JsonSerializer.Deserialize<T>(content, JsonOptions);
 		}
-
-		var content = await response.Content.ReadAsStringAsync();
-
-		if (typeof(T) == typeof(string))
-			return (T)(object)content;
-
-		if (string.IsNullOrWhiteSpace(content))
-			return default;
-
-		return JsonSerializer.Deserialize<T>(content, JsonOptions);
 	}
 
 	public bool IsAuthenticated =>
