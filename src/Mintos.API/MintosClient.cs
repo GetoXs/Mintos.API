@@ -2,16 +2,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Mintos.API;
 
-public class MintosClient : IDisposable
+public class MintosClient
 {
 	private readonly MintosProxyApi _proxyApi;
-	private readonly ILogger<MintosClient>? _logger;
+	private readonly ILogger<MintosClient> _logger;
 
 	public MintosClient(
-		ILogger<MintosClient>? logger = null, 
-		Dictionary<string, string>? extraHeaders = null)
+		MintosProxyApi proxyApi,
+		ILogger<MintosClient> logger)
 	{
-		_proxyApi = new MintosProxyApi(extraHeaders);
+		_proxyApi = proxyApi;
 		_logger = logger;
 	}
 
@@ -127,10 +127,4 @@ public class MintosClient : IDisposable
 			referer: referer);
 	}
 	#endregion
-
-	public void Dispose()
-	{
-		_proxyApi.Dispose();
-		GC.SuppressFinalize(this);
-	}
 }

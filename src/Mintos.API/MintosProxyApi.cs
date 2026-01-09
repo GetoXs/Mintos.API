@@ -1,6 +1,7 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Mintos.API;
 
@@ -10,6 +11,7 @@ public class MintosProxyApi : IDisposable
 	private readonly CookieContainer _cookieContainer = new();
 	private string? _antiCsrfToken;
 	private readonly Dictionary<string, string>? _extraHeaders;
+	private readonly ILogger<MintosProxyApi> _logger;
 
 	public Func<Task>? OnUnauthorizedAsync { get; set; }
 
@@ -18,7 +20,7 @@ public class MintosProxyApi : IDisposable
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 	};
 
-	public MintosProxyApi(Dictionary<string, string>? extraHeaders = null)
+	public MintosProxyApi(ILogger<MintosProxyApi> logger, Dictionary<string, string>? extraHeaders = null)
 	{
 		var clientHandler = new HttpClientHandler
 		{
@@ -31,6 +33,7 @@ public class MintosProxyApi : IDisposable
 			BaseAddress = new Uri("https://www.mintos.com/"),
 		};
 		_extraHeaders = extraHeaders;
+		_logger = logger;
 	}
 
 	public void SetCredentials(string mwSessionId, string phpSessionId, string antiCsrfToken)
@@ -39,6 +42,12 @@ public class MintosProxyApi : IDisposable
 		_cookieContainer.Add(uri, new Cookie("MW_SESSION_ID", mwSessionId));
 		_cookieContainer.Add(uri, new Cookie("PHPSESSID", phpSessionId));
 		_antiCsrfToken = antiCsrfToken;
+	}
+
+	public void UpdateAntiCsrfToken(string antiCsrfToken)
+	{
+		_antiCsrfToken = antiCsrfToken;
+		_logger.LogInformation("Anti-CSRF token updated.");
 	}
 
 	public MintosCredentials GetCurrentCredentials()
@@ -57,7 +66,8 @@ public class MintosProxyApi : IDisposable
 		string url,
 		object? body = null,
 		string? referer = null,
-		string? xRequestedWith = null)
+		string? xRequestedWith = null,
+		string? acceptHeader = null)
 	{
 		bool wasRetried = false;
 	start:
@@ -69,6 +79,11 @@ public class MintosProxyApi : IDisposable
 			if (!string.IsNullOrEmpty(xRequestedWith))
 			{
 				request.Headers.Add("X-Requested-With", xRequestedWith);
+			}
+
+			if (!string.IsNullOrEmpty(acceptHeader))
+			{
+				request.Headers.Add("Accept", acceptHeader);
 			}
 
 			if (_extraHeaders != null)
@@ -95,10 +110,12 @@ public class MintosProxyApi : IDisposable
 					response.StatusCode == HttpStatusCode.Forbidden ||
 					(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
 				{
+					_logger.LogError($"Unauthorized access: {errorContent}");
 					if (OnUnauthorizedAsync != null)
 					{
 						if (!wasRetried)
 						{
+							_logger.LogInformation("Retrying request after unauthorized access");
 							await OnUnauthorizedAsync();
 							wasRetried = true;
 							goto start;
