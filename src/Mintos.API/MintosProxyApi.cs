@@ -111,15 +111,12 @@ public class MintosProxyApi : IDisposable
 					(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
 				{
 					_logger.LogError($"Unauthorized access: {errorContent}");
-					if (OnUnauthorizedAsync != null)
+					if (OnUnauthorizedAsync != null && !wasRetried)
 					{
-						if (!wasRetried)
-						{
-							_logger.LogInformation("Retrying request after unauthorized access");
-							await OnUnauthorizedAsync();
-							wasRetried = true;
-							goto start;
-						}
+						_logger.LogInformation("Retrying request after unauthorized access");
+						await OnUnauthorizedAsync();
+						wasRetried = true;
+						goto start;
 					}
 					else
 					{
