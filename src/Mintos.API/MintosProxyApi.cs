@@ -110,10 +110,10 @@ public class MintosProxyApi : IDisposable
 					response.StatusCode == HttpStatusCode.Forbidden ||
 					(response.StatusCode == HttpStatusCode.BadRequest && errorContent.Contains("JWT Token error")))
 				{
-					_logger.LogError($"Unauthorized access: {errorContent}");
+					_logger.LogError($"Unauthorized access on {url}: {errorContent}");
 					if (OnUnauthorizedAsync != null && !wasRetried)
 					{
-						_logger.LogInformation("Retrying request after unauthorized access");
+						_logger.LogInformation("Retrying request after unauthorized access on {Url}", url);
 						await OnUnauthorizedAsync();
 						wasRetried = true;
 						goto start;
