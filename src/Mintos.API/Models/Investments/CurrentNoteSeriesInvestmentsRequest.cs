@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Mintos.API;
 
 /// <summary>
-/// POST user/note-series/investments/current — filters for the investor's active note-series positions.
+/// POST user/note-series/investments/current and …/finished — filters for note-series positions.
 /// Kept separate from <see cref="NoteSeriesSearchRequestBase"/> (e.g. <c>currency</c> vs <c>currencies</c>, nullable page size).
 /// </summary>
 public class CurrentNoteSeriesInvestmentsRequest
