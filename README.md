@@ -2,6 +2,10 @@
 
 A **.NET** library that calls the [Mintos](https://www.mintos.com/) API. It is **not** an official Mintos SDK or a product of the platform.
 
+[![NuGet](https://img.shields.io/nuget/dt/Mintos.API.svg)](https://www.nuget.org/packages/Mintos.API) 
+[![NuGet](https://img.shields.io/nuget/vpre/Mintos.API.svg)](https://www.nuget.org/packages/Mintos.API)
+[![license](https://img.shields.io/github/license/GetoXs/Mintos.API.svg)](https://github.com/GetoXs/Mintos.API/blob/master/LICENSE.txt)
+
 ---
 
 ## ⚠️ Legal notice and liability
