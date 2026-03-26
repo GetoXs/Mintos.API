@@ -26,7 +26,7 @@ A **.NET** library that calls the [Mintos](https://www.mintos.com/) API. It is *
 
 ## Requirements
 
-- Target **.NET 8** or later (same major as the package)
+- Target **.NET 10** or later (same major as the package)
 - `Microsoft.Extensions.Logging.Abstractions` is referenced by the package; you do not add it manually unless you need a specific version
 
 ---

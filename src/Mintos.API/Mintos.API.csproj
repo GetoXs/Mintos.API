@@ -1,17 +1,43 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Authors>GetoX</Authors>
+    <Copyright>Copyright (c) GetoX</Copyright>
+    <Description>Unofficial .NET client for the Mintos API (cookie session and anti-CSRF). Not an official Mintos SDK or product.</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/GetoXs/Mintos.API.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/GetoXs/Mintos.API</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>mintos;p2p;lending;marketplace;investments;api-client;http;dotnet;csharp</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Debug;Release</Configurations>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)' == 'SignAndRelease'">
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\Mintos.API.snk</AssemblyOriginatorKeyFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="logo.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
