@@ -38,8 +38,8 @@ public abstract class NoteSeriesSearchRequestBase
 
 public class SortingOptions
 {
-	public string SortField { get; set; } = "weightedAverageYieldToMaturity";
-	public string SortOrder { get; set; } = "DESC";
+	public string? SortField { get; set; }
+	public string? SortOrder { get; set; }
 }
 
 public class PaginationOptions
