@@ -94,6 +94,17 @@ public class MintosClient
 			body: request,
 			referer: referer);
 	}
+
+	public async Task<CurrentNoteSeriesInvestmentsResponse?> GetCurrentNoteSeriesInvestmentsAsync(
+		CurrentNoteSeriesInvestmentsRequest request,
+		string? referer = null)
+	{
+		return await _proxyApi.SendRequestAsync<CurrentNoteSeriesInvestmentsResponse>(
+			HttpMethod.Post,
+			"webapp/api/marketplace-api/v1/user/note-series/investments/current",
+			body: request,
+			referer: referer);
+	}
 	#endregion
 
 	#region Cart Operations - Secondary Market
