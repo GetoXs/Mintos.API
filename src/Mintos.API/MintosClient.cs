@@ -72,6 +72,17 @@ public class MintosClient
 			$"webapp/api/marketplace-api/v1/accounts/{accountCurrencyCode}/portfolio-distributions",
 			referer: referer);
 	}
+
+	/// <param name="currencyCode">ISO 4217 numeric code (e.g. 978 for EUR).</param>
+	public async Task<UserCurrencyOverviewResponse?> GetUserCurrencyOverviewAsync(
+		int currencyCode,
+		string? referer = null)
+	{
+		return await _proxyApi.SendRequestAsync<UserCurrencyOverviewResponse>(
+			HttpMethod.Get,
+			$"webapp/api/marketplace-api/v1/user/overview/currency/{currencyCode}",
+			referer: referer);
+	}
 	#endregion
 
 	#region Marketplace note series
