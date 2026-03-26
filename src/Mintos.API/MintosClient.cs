@@ -122,6 +122,15 @@ public class MintosClient
 	#endregion
 
 	#region Cart Operations - Primary Market
+	public async Task AddNotesToCartAsync(CartNoteSeriesAddItem[] items, string? referer = null)
+	{
+		await _proxyApi.SendRequestAsync<object>(
+			HttpMethod.Post,
+			"webapp/api/marketplace-api/v1/cart/note-series",
+			body: items,
+			referer: referer);
+	}
+
 	public async Task<CartNotesResponse?> GetNotesInCartAsync(string? referer = null)
 	{
 		return await _proxyApi.SendRequestAsync<CartNotesResponse>(

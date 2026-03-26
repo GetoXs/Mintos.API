@@ -31,6 +31,7 @@ public class PrimaryMarketNoteSeriesItem
 	public MoneyAmount? NotePrice { get; set; }
 	public bool HasLatePaymentInterest { get; set; }
 	public int NoteIssuer { get; set; }
+	public string? LenderGroupGuarantee { get; set; }
 	public string? ScheduleType { get; set; }
 	public decimal LateLoanExposure { get; set; }
 	public int FinishedPaymentCount { get; set; }

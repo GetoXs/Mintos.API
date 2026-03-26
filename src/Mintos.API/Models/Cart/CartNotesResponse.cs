@@ -5,7 +5,6 @@ namespace Mintos.API;
 /// </summary>
 public class CartNotesResponse
 {
-    public List<object>? Items { get; set; }
-    public object? Pagination { get; set; }
+	public List<CartNoteSeriesItem>? Items { get; set; }
+	public PaginationResult? Pagination { get; set; }
 }
-
