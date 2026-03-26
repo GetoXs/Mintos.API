@@ -61,6 +61,17 @@ public class MintosClient
 		return decimal.TryParse(aggregate.AccountBalance, System.Globalization.NumberStyles.Any,
 			System.Globalization.CultureInfo.InvariantCulture, out var balance) ? balance : 0;
 	}
+
+	/// <param name="accountCurrencyCode">ISO 4217 numeric code (e.g. 978 for EUR).</param>
+	public async Task<PortfolioDistributionsResponse?> GetPortfolioDistributionsAsync(
+		int accountCurrencyCode,
+		string? referer = null)
+	{
+		return await _proxyApi.SendRequestAsync<PortfolioDistributionsResponse>(
+			HttpMethod.Get,
+			$"webapp/api/marketplace-api/v1/accounts/{accountCurrencyCode}/portfolio-distributions",
+			referer: referer);
+	}
 	#endregion
 
 	#region Marketplace note series
