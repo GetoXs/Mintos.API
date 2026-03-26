@@ -64,7 +64,16 @@ public class MoneyAmount
 public class LendingCompanyRiskScore
 {
     public string? Score { get; set; }
+    public LendingCompanyRiskSubscores? Subscores { get; set; }
 
     public decimal ScoreDecimal => decimal.TryParse(Score, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0;
+}
+
+public class LendingCompanyRiskSubscores
+{
+    public string? LoanPortfolioPerformance { get; set; }
+    public string? LoanServicerEfficiency { get; set; }
+    public string? BuybackStrength { get; set; }
+    public string? CooperationStructure { get; set; }
 }
 

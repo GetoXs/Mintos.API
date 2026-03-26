@@ -63,12 +63,23 @@ public class MintosClient
 	}
 	#endregion
 
-	#region Secondary Market
+	#region Marketplace note series
 	public async Task<SecondaryMarketResponse?> GetSecondaryMarketNotesAsync(SecondaryMarketRequest request, string? referer = null)
 	{
 		return await _proxyApi.SendRequestAsync<SecondaryMarketResponse>(
 			HttpMethod.Post,
 			"webapp/api/marketplace-api/v1/note-series/secondary",
+			body: request,
+			referer: referer);
+	}
+
+	public async Task<PrimaryMarketNoteSeriesResponse?> GetPrimaryMarketNoteSeriesAsync(
+		PrimaryMarketNoteSeriesRequest request,
+		string? referer = null)
+	{
+		return await _proxyApi.SendRequestAsync<PrimaryMarketNoteSeriesResponse>(
+			HttpMethod.Post,
+			"webapp/api/marketplace-api/v1/note-series/primary",
 			body: request,
 			referer: referer);
 	}
